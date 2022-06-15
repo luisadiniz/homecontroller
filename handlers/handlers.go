@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-)
 
-var (
-	lightbulbs = map[string]bool{}
+	"github.com/luisadiniz/homecontroller/repositories"
 )
 
 type Lightbulb struct {
@@ -38,6 +36,13 @@ func HandleLightbulbs(w http.ResponseWriter, r *http.Request) {
 func GetLightbulbs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+
+	lightbulbs, err := repositories.GetLightbulbs(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
 	json.NewEncoder(w).Encode(lightbulbs)
 }
 
@@ -49,7 +54,20 @@ func CreateLightbulbs(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		return
 	}
-	lightbulbs[lb.Name] = lb.On
+	err = repositories.CreateLightbulbs(r.Context(), lb.Name, lb.On)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	lightbulbs, err := repositories.GetLightbulbs(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(lightbulbs)
@@ -58,18 +76,51 @@ func CreateLightbulbs(w http.ResponseWriter, r *http.Request) {
 func SwitchLightbulbsState(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 
-	lightbulbs[name] = !lightbulbs[name]
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+
+	currentStatus, err := repositories.GetLightbulbById(r.Context(), name)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	err = repositories.UpdateLightbulb(r.Context(), name, !currentStatus)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	lightbulbs, err := repositories.GetLightbulbs(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
 	json.NewEncoder(w).Encode(lightbulbs)
 }
 
 func DeleteLightbulb(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 
-	delete(lightbulbs, name)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+
+	err := repositories.DeleteLightbulb(r.Context(), name)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	lightbulbs, err := repositories.GetLightbulbs(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
 	json.NewEncoder(w).Encode(lightbulbs)
 }
