@@ -13,27 +13,27 @@ type Lightbulb struct {
 }
 
 type Repository interface {
-	GetLightbulbs(ctx context.Context) (map[string]bool, error)
-	GetLightbulbById(ctx context.Context, name string) (bool, error)
-	CreateLightbulbs(ctx context.Context, name string, value bool) error
-	UpdateLightbulb(ctx context.Context, name string, value bool) error
-	DeleteLightbulb(ctx context.Context, name string) error
+	Get(ctx context.Context) (map[string]bool, error)
+	GetById(ctx context.Context, name string) (bool, error)
+	Create(ctx context.Context, name string, value bool) error
+	Update(ctx context.Context, name string, value bool) error
+	Delete(ctx context.Context, name string) error
 }
 
 func HandleLightbulbs(repo Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			GetLightbulbs(repo)
+			Get(w, r, repo)
 			return
 		case http.MethodPost:
-			CreateLightbulbs(repo)
+			Create(w, r, repo)
 			return
 		case http.MethodPut:
-			SwitchLightbulbsState(repo)
+			SwitchState(w, r, repo)
 			return
 		case http.MethodDelete:
-			DeleteLightbulb(repo)
+			Delete(w, r, repo)
 			return
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -42,102 +42,94 @@ func HandleLightbulbs(repo Repository) http.HandlerFunc {
 	}
 }
 
-func GetLightbulbs(repo Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+func Get(w http.ResponseWriter, r *http.Request, repo Repository) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-		lightbulbs, err := repo.GetLightbulbs(r.Context())
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-		json.NewEncoder(w).Encode(lightbulbs)
+	lightbulbs, err := repo.Get(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
 	}
+	json.NewEncoder(w).Encode(lightbulbs)
 }
 
-func CreateLightbulbs(repo Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var lb Lightbulb
-		err := json.NewDecoder(r.Body).Decode(&lb)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Println(err.Error())
-			return
-		}
-		err = repo.CreateLightbulbs(r.Context(), lb.Name, lb.On)
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		lightbulbs, err := repo.GetLightbulbs(r.Context())
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(lightbulbs)
+func Create(w http.ResponseWriter, r *http.Request, repo Repository) {
+	var lb Lightbulb
+	err := json.NewDecoder(r.Body).Decode(&lb)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err.Error())
+		return
 	}
+	err = repo.Create(r.Context(), lb.Name, lb.On)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	lightbulbs, err := repo.Get(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(lightbulbs)
 }
 
-func SwitchLightbulbsState(repo Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Query().Get("name")
+func SwitchState(w http.ResponseWriter, r *http.Request, repo Repository) {
+	name := r.URL.Query().Get("name")
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-		currentStatus, err := repo.GetLightbulbById(r.Context(), name)
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		err = repo.UpdateLightbulb(r.Context(), name, !currentStatus)
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		lightbulbs, err := repo.GetLightbulbs(r.Context())
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		json.NewEncoder(w).Encode(lightbulbs)
+	currentStatus, err := repo.GetById(r.Context(), name)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
 	}
+
+	err = repo.Update(r.Context(), name, !currentStatus)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	lightbulbs, err := repo.Get(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(lightbulbs)
 }
 
-func DeleteLightbulb(repo Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Query().Get("name")
+func Delete(w http.ResponseWriter, r *http.Request, repo Repository) {
+	name := r.URL.Query().Get("name")
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-		err := repo.DeleteLightbulb(r.Context(), name)
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-
-		lightbulbs, err := repo.GetLightbulbs(r.Context())
-		if err != nil {
-			w.WriteHeader(http.StatusFailedDependency)
-			fmt.Println(err.Error())
-			return
-		}
-		json.NewEncoder(w).Encode(lightbulbs)
+	err := repo.Delete(r.Context(), name)
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
 	}
+
+	lightbulbs, err := repo.Get(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		fmt.Println(err.Error())
+		return
+	}
+	json.NewEncoder(w).Encode(lightbulbs)
 }
