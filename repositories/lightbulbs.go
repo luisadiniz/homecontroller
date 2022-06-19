@@ -2,29 +2,35 @@ package repositories
 
 import "context"
 
-var (
-	lightbulbs = map[string]bool{}
-)
-
-func GetLightbulbs(ctx context.Context) (map[string]bool, error) {
-	return lightbulbs, nil
+type Lightbulbs struct {
+	data map[string]bool
 }
 
-func GetLightbulbById(ctx context.Context, name string) (bool, error) {
-	return lightbulbs[name], nil
+func New() *Lightbulbs {
+	return &Lightbulbs{
+		data: map[string]bool{},
+	}
 }
 
-func CreateLightbulbs(ctx context.Context, name string, value bool) error {
-	lightbulbs[name] = value
+func (l *Lightbulbs) GetLightbulbs(ctx context.Context) (map[string]bool, error) {
+	return l.data, nil
+}
+
+func (l *Lightbulbs) GetLightbulbById(ctx context.Context, name string) (bool, error) {
+	return l.data[name], nil
+}
+
+func (l *Lightbulbs) CreateLightbulbs(ctx context.Context, name string, value bool) error {
+	l.data[name] = value
 	return nil
 }
 
-func UpdateLightbulb(ctx context.Context, name string, value bool) error {
-	lightbulbs[name] = value
+func (l *Lightbulbs) UpdateLightbulb(ctx context.Context, name string, value bool) error {
+	l.data[name] = value
 	return nil
 }
 
-func DeleteLightbulb(ctx context.Context, name string) error {
-	delete(lightbulbs, name)
+func (l *Lightbulbs) DeleteLightbulb(ctx context.Context, name string) error {
+	delete(l.data, name)
 	return nil
 }
