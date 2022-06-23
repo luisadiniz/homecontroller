@@ -44,7 +44,6 @@ func HandleLightbulbs(repo Repository) http.HandlerFunc {
 
 func Get(w http.ResponseWriter, r *http.Request, repo Repository) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	lightbulbs, err := repo.Get(r.Context())
 	if err != nil {
@@ -52,6 +51,7 @@ func Get(w http.ResponseWriter, r *http.Request, repo Repository) {
 		fmt.Println(err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(lightbulbs)
 }
 
@@ -86,7 +86,6 @@ func SwitchState(w http.ResponseWriter, r *http.Request, repo Repository) {
 	name := r.URL.Query().Get("name")
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	currentStatus, err := repo.GetById(r.Context(), name)
 	if err != nil {
@@ -108,7 +107,7 @@ func SwitchState(w http.ResponseWriter, r *http.Request, repo Repository) {
 		fmt.Println(err.Error())
 		return
 	}
-
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(lightbulbs)
 }
 
@@ -116,7 +115,6 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Repository) {
 	name := r.URL.Query().Get("name")
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	err := repo.Delete(r.Context(), name)
 	if err != nil {
@@ -131,5 +129,6 @@ func Delete(w http.ResponseWriter, r *http.Request, repo Repository) {
 		fmt.Println(err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(lightbulbs)
 }
