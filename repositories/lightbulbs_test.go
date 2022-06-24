@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestLightbulbs_Get(t *testing.T) {
+func TestInMemoryDB_Get(t *testing.T) {
 	type fields struct {
 		data map[string]bool
 	}
@@ -52,22 +52,22 @@ func TestLightbulbs_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := &Lightbulbs{
+			l := &InMemoryDB{
 				data: tt.fields.data,
 			}
 			got, err := l.Get(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Lightbulbs.Get() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InMemoryDB.Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Lightbulbs.Get() = %v, want %v", got, tt.want)
+				t.Errorf("InMemoryDB.Get() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestLightbulbs_GetById(t *testing.T) {
+func TestInMemoryDB_GetById(t *testing.T) {
 	type fields struct {
 		data map[string]bool
 	}
@@ -115,22 +115,22 @@ func TestLightbulbs_GetById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := &Lightbulbs{
+			l := &InMemoryDB{
 				data: tt.fields.data,
 			}
 			got, err := l.GetById(tt.args.ctx, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Lightbulbs.GetById() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InMemoryDB.GetById() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Lightbulbs.GetById() = %v, want %v", got, tt.want)
+				t.Errorf("InMemoryDB.GetById() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestLightbulbs_Create(t *testing.T) {
+func TestInMemoryDB_Create(t *testing.T) {
 	type fields struct {
 		data map[string]bool
 	}
@@ -185,20 +185,20 @@ func TestLightbulbs_Create(t *testing.T) {
 		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := &Lightbulbs{
+			l := &InMemoryDB{
 				data: tt.fields.data,
 			}
 			if err := l.Create(tt.args.ctx, tt.args.name, tt.args.value); (err != nil) != tt.wantErr {
-				t.Errorf("Lightbulbs.Create() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InMemoryDB.Create() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !reflect.DeepEqual(tt.fields.data, tt.want) {
-				t.Errorf("Lightbulbs.Create() = %v, want %v", tt.fields.data, tt.want)
+				t.Errorf("InMemoryDB.Create() = %v, want %v", tt.fields.data, tt.want)
 			}
 		})
 	}
 }
 
-func TestLightbulbs_Update(t *testing.T) {
+func TestInMemoryDB_Update(t *testing.T) {
 	type fields struct {
 		data map[string]bool
 	}
@@ -252,20 +252,20 @@ func TestLightbulbs_Update(t *testing.T) {
 		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := &Lightbulbs{
+			l := &InMemoryDB{
 				data: tt.fields.data,
 			}
 			if err := l.Update(tt.args.ctx, tt.args.name, tt.args.value); (err != nil) != tt.wantErr {
-				t.Errorf("Lightbulbs.Update() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InMemoryDB.Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !reflect.DeepEqual(tt.fields.data, tt.want) {
-				t.Errorf("Lightbulbs.Update() = %v, want %v", tt.fields.data, tt.want)
+				t.Errorf("InMemoryDB.Update() = %v, want %v", tt.fields.data, tt.want)
 			}
 		})
 	}
 }
 
-func TestLightbulbs_Delete(t *testing.T) {
+func TestInMemoryDB_Delete(t *testing.T) {
 	type fields struct {
 		data map[string]bool
 	}
@@ -318,14 +318,14 @@ func TestLightbulbs_Delete(t *testing.T) {
 		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := &Lightbulbs{
+			l := &InMemoryDB{
 				data: tt.fields.data,
 			}
 			if err := l.Delete(tt.args.ctx, tt.args.name); (err != nil) != tt.wantErr {
-				t.Errorf("Lightbulbs.Delete() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("InMemoryDB.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !reflect.DeepEqual(tt.fields.data, tt.want) {
-				t.Errorf("Lightbulbs.Delete() = %v, want %v", tt.fields.data, tt.want)
+				t.Errorf("InMemoryDB.Delete() = %v, want %v", tt.fields.data, tt.want)
 			}
 		})
 	}

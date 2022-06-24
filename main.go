@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	repo := repositories.New()
+	repo := repositories.NewInMemoryDB()
 	router := http.NewServeMux()
 
 	router.HandleFunc("/lightbulbs", handlers.HandleLightbulbs(repo))

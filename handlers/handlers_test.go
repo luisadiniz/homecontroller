@@ -88,6 +88,22 @@ func TestHandleLightbulbs(t *testing.T) {
 			},
 		},
 		{
+			name: "WhenPostFailReturnBadRequest",
+			args: args{
+				r: func() *http.Request {
+					return httptest.NewRequest(http.MethodPost, "/lightbulbs", nil)
+				},
+				repo: func() Repository {
+					return &repositoryMock{
+						err:        errors.New("Post Lightbulb -> failed to connect to database"),
+						lightbulbs: map[string]bool{},
+					}
+				},
+			},
+			wantCode: http.StatusBadRequest,
+			wantBody: map[string]bool{},
+		},
+		{
 			name: "WhenPostFailReturnFailedDependency",
 			args: args{
 				r: func() *http.Request {
