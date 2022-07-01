@@ -1,6 +1,8 @@
 package repositories
 
-import "context"
+import (
+	"context"
+)
 
 type InMemoryDB struct {
 	data map[string]bool

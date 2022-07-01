@@ -9,13 +9,17 @@ import (
 )
 
 func main() {
-	repo := repositories.NewInMemoryDB()
+	//repo := repositories.NewInMemoryDB()
+	repo, err := repositories.NewRelationalRepository()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	router := http.NewServeMux()
 
 	router.HandleFunc("/lightbulbs", handlers.HandleLightbulbs(repo))
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    ":80",
 		Handler: router,
 	}
 
