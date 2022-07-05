@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -10,7 +11,10 @@ import (
 
 func main() {
 	//repo := repositories.NewInMemoryDB()
-	repo, err := repositories.NewRelationalRepository()
+	open := func(driverName, dataSourceName string) (repositories.DatabaseEngine, error){
+		return sql.Open(driverName, dataSourceName)
+	}
+	repo, err := repositories.NewRelationalRepository(open)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

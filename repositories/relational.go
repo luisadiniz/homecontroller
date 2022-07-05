@@ -4,22 +4,25 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 type RelationalRepository struct {
-	data *sql.DB
+	data DatabaseEngine
 }
 
-func NewRelationalRepository() (*RelationalRepository, error) {
+type DatabaseEngine interface {
+	Query(query string, args ...any) (*sql.Rows, error)
+	QueryRow(query string, args ...any) *sql.Row
+	Exec(query string, args ...any) (sql.Result, error)
+}
 
-	connectionString := fmt.Sprintf("host=db port=26257 dbname=mydb user=luisa password=anything sslmode=disable")
+func NewRelationalRepository(open func(driverName, dataSourceName string) (DatabaseEngine, error)) (*RelationalRepository, error) {
 
-	var (
-		db  *sql.DB
-		err error
-	)
+	connectionString := fmt.Sprintf("host=db port=26257 dbname=mydb user=luisa password=whatever sslmode=disable")
 
-	db, err = sql.Open("postgres", connectionString)
+	db, err := open("postgres", connectionString)
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +43,7 @@ func (l *RelationalRepository) Get(ctx context.Context) (map[string]bool, error)
 	rows, err := l.data.Query("SELECT name, isOn FROM lightbulbs")
 	if err != nil {
 		fmt.Println("No rows were returned!")
+		return lightbulbs, err
 	}
 	defer rows.Close()
 
@@ -48,7 +52,7 @@ func (l *RelationalRepository) Get(ctx context.Context) (map[string]bool, error)
 			name string
 			on   bool
 		)
-		err := rows.Scan(name, on)
+		err := rows.Scan(&name, &on)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
