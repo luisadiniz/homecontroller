@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -129,7 +130,7 @@ func TestRelationalRepository_GetById(t *testing.T) {
 				data: func() DatabaseEngine {
 					db, mock, _ := sqlmock.New()
 
-					mock.ExpectQuery("SELECT name, isOn FROM lightbulbs WHERE name=$1").WithArgs("sala").WillReturnError(errors.New("Database failed"))
+					mock.ExpectQuery(regexp.QuoteMeta("SELECT name, isOn FROM lightbulbs WHERE name=$1")).WithArgs("sala").WillReturnError(errors.New("Database failed"))
 					return db
 				},
 			},
@@ -151,7 +152,7 @@ func TestRelationalRepository_GetById(t *testing.T) {
 					})
 					rows.AddRow("cozinha", true)
 
-					mock.ExpectQuery("SELECT name, isOn FROM lightbulbs WHERE name=$1").WithArgs("cozinha").WillReturnRows(rows)
+					mock.ExpectQuery(regexp.QuoteMeta("SELECT name, isOn FROM lightbulbs WHERE name=$1")).WithArgs("cozinha").WillReturnRows(rows)
 					return db
 				},
 			},

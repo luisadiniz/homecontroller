@@ -75,6 +75,7 @@ func (l *RelationalRepository) GetById(ctx context.Context, name string) (bool, 
 	err := row.Scan(&repositoryName, &isOn)
 	if err != nil {
 		fmt.Println("No rows were returned!")
+		return false, err
 	}
 
 	return isOn, nil
@@ -86,6 +87,7 @@ func (l *RelationalRepository) Create(ctx context.Context, name string, value bo
 	_, err := l.data.Exec(sqlStatement, name, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		return err
 	}
 	return nil
 }
@@ -96,6 +98,7 @@ func (l *RelationalRepository) Update(ctx context.Context, name string, value bo
 	_, err := l.data.Exec(sqlStatement, name, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		return err
 	}
 	return nil
 }
@@ -106,6 +109,7 @@ func (l *RelationalRepository) Delete(ctx context.Context, name string) error {
 	_, err := l.data.Exec(sqlStatement, name)
 	if err != nil {
 		fmt.Println(err.Error())
+		return err
 	}
 	return nil
 }
