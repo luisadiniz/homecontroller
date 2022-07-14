@@ -142,7 +142,7 @@ func TestRelationalRepository_GetById(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "WhenDatabaseUpdateValue_ShouldReturnNoError",
+			name: "WhenDatabaseReturnHasRow_ShouldReturnBoolValueAndNoError",
 			fields: fields{
 				data: func() DatabaseEngine {
 					db, mock, _ := sqlmock.New()
